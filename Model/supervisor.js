@@ -1,26 +1,26 @@
 const mongoose = require('mongoose');
-const connectDB = require('../Data/config');
+const bcrypt = require('bcrypt');
+
+
 // const validator = require('validator')
 
-const SupervisorSchema = new mongoose.Schema(
+const supervisorSchema = new mongoose.Schema(
   {
     firstname: {
         type: String,
-        required: true,
         min: 2,
         max: 30,
-        trim: true
+        trim: true,
+        require: true
       },
       lastname: {
         type: String,
-        required: true,
         min: 2,
         max: 30,
         trim: true
       },
       email: {
         type: String,
-        required: true,
         max: 50,
         unique: true,
         lowercase: true,
@@ -32,7 +32,6 @@ const SupervisorSchema = new mongoose.Schema(
       },
       solid:{
         type: Number,
-        required: true,
         min: 3,
         max: 4,
         trim: true
@@ -41,22 +40,53 @@ const SupervisorSchema = new mongoose.Schema(
       },
       password:{
         type: String,
-        required: true,
         min: 5,
+        select: false
       },
       city: String,
       state: String,
       country: String,
-      jobrole: String,
       phoneNumber: String,
       role: {
         type: String,
-        required: true,
         min: 5,
       },
-    
+//       Appraisal: {
+//         type: mongoose.Schema.ObjectId,
+//         ref: 'Appraisal',
+//         require: [true, 'fill in the supervisors details']
+//    },
+//    staff: {
+//     type: mongoose.Schema.ObjectId,
+//     ref: 'staff',
+//     require: [true, 'fill in the supervisors details']
+// },
     },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Supervisor", SupervisorSchema)
+// supervisorSchema.pre('save', async function(next){
+// // only run this function if the password was modified
+// if(!this.password.isModified('password')) return next();
+// // match the passwor with the cost at 12
+// this.password = await bcrypt.hash(this.password, 12)
+
+// next()
+
+// })
+
+supervisorSchema.methods.correctPassword = async function(candidatePassword, supervisorPassword) {
+  return await bcrypt.compare(candidatePassword, supervisorPassword)
+}
+
+// supervisorSchema.pre(/^find/, function(next) {
+//   this.populate({
+//     path:'staff',
+//     select: 'name'
+//   }).populate({
+//     path: 'appraisal',
+//     select: 'score1 score2 score3 score4'
+//   })
+//   next();
+// })
+module.exports = mongoose.model("Supervisor", supervisorSchema)

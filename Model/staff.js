@@ -33,30 +33,45 @@ const StaffSchema = new mongoose.Schema(
       solid:{
         type: Number,
         required: true,
-        min: 3,
+        min: 4,
         max: 4,
         trim: true
             
       
       },
-      password:{
-        type: String,
-        required: true,
-        min: 5,
-      },
+    
       city: String,
       state: String,
       country: String,
       jobrole: String,
       phoneNumber: String,
-      role: {
-        type: String,
-        required: true,
-        min: 5,
+      supervisor: {
+           type: mongoose.Schema.ObjectId,
+           ref: 'Supervisor',
+           require: [true, 'fill in the supervisors details']
       },
+      Appraisal: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Appraisal',
+        require: [true, 'fill in the supervisors details']
+   },
+      // role: {
+      //   type: String,
+      //   required: true,
+      //   min: 5,
+      // },
     
     },
   { timestamps: true }
 );
-
+StaffSchema.pre(/^find/, function(next) {
+  this.populate({
+    path:'supervisor',
+    select: 'name'
+  }).populate({
+    path: 'appraisal',
+    select: 'score1 score2 score3 score4'
+  })
+  next();
+})
 module.exports = mongoose.model("Staff", StaffSchema)
